@@ -13,11 +13,12 @@ from AIPlayer import *
 class CheckerGame():
     def __init__(self):
         self.lock = _thread.allocate_lock()
-        self.board = self.initBoard()
+        self.board = self.initBigBoard()
         self.playerTurn = self.whoGoFirst()
         self.difficulty = self.getDifficulty()
         self.AIPlayer = AIPlayer(self, self.difficulty)
-        self.GUI = BoardGUI(self)
+        self.size = 8
+        self.GUI = BoardGUI(self, self.size)
 
         # AI goes first
         if not self.isPlayerTurn():
@@ -41,7 +42,7 @@ class CheckerGame():
     # This function initializes the game board.
     # Each checker has a label. Positive checkers for the player,
     # and negative checkers for the opponent.
-    def initBoard(self):
+    def initSmallBoard(self):
         board = [[0]*6 for _ in range(6)]
         self.playerCheckers = set()
         self.opponentCheckers = set()
@@ -61,7 +62,35 @@ class CheckerGame():
                 self.checkerPositions[i + 1] = (4, i)
 
         self.boardUpdated = True
+        return board
 
+    # This function initializes the game board of normal size.
+    # Each checker has a label. Positive checkers for the player,
+    # and negative checkers for the opponent.
+    def initBigBoard(self):
+        board = [[0] * 8 for _ in range(8)]
+        self.playerCheckers = set()
+        self.opponentCheckers = set()
+        self.checkerPositions = {}
+        for i in range(12):
+            self.playerCheckers.add(i + 1)
+            self.opponentCheckers.add(-(i + 1))
+            if i < 4:
+                board[0][i*2+1] = -(i + 1)
+                board[7][6-i*2] = i + 1
+                self.checkerPositions[-(i + 1)] = (0, i*2+1)
+                self.checkerPositions[i + 1] = (7, 6-i*2)
+            elif i < 8:
+                board[1][(i-4)*2] = -(i + 1)
+                board[6][7-(i-4)*2] = i + 1
+                self.checkerPositions[-(i + 1)] = (1, (i-4)*2)
+                self.checkerPositions[i + 1] = (6, 7-(i-4)*2)
+            else:
+                board[2][i*2-15] = -(i + 1)
+                board[5][22-i*2] = i + 1
+                self.checkerPositions[-(i + 1)] = (2, i*2-15)
+                self.checkerPositions[i + 1] = (5, 22-i*2)
+        self.boardUpdated = True
         return board
 
     def getBoard(self):
@@ -71,10 +100,10 @@ class CheckerGame():
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
                 check = self.board[i][j]
-                if (check < 0):
-                    print(check,end=' ')
+                if check < 0:
+                    print(check, end=' ')
                 else:
-                    print(' ' + str(check),end=' ')
+                    print(' ' + str(check), end=' ')
 
             print()
 
@@ -180,8 +209,8 @@ class CheckerGame():
     # check if the given move if valid for the current player
     def isValidMove(self, oldrow, oldcol, row, col, playerTurn):
         # invalid index
-        if oldrow < 0 or oldrow > 5 or oldcol < 0 or oldcol > 5 \
-                or row < 0 or row > 5 or col < 0 or col > 5:
+        if oldrow < 0 or oldrow > self.size-1 or oldcol < 0 or oldcol > self.size-1 \
+                or row < 0 or row > self.size-1 or col < 0 or col > self.size-1:
             return False
         # No checker exists in original position
         if self.board[oldrow][oldcol] == 0:

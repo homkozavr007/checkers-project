@@ -8,13 +8,13 @@ import tkinter
 from CheckerGame import *
 
 class BoardGUI():
-    def __init__(self, game):
+    def __init__(self, game, size):
         # Initialize parameters
         self.game = game
-        self.ROWS = 6
-        self.COLS = 6
-        self.WINDOW_WIDTH = 600
-        self.WINDOW_HEIGHT = 600
+        self.ROWS = size
+        self.COLS = size
+        self.WINDOW_WIDTH = 720
+        self.WINDOW_HEIGHT = 720
         self.col_width = self.WINDOW_WIDTH / self.COLS
         self.row_height = self.WINDOW_HEIGHT / self.ROWS
 
@@ -29,15 +29,15 @@ class BoardGUI():
         self.board = [[0]*self.COLS for _ in range(self.ROWS)]
         self.tiles = [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]
 
-        # Print dark square
-        for i in range(6):
-            for j in range(6):
+        # Print dark squares
+        for i in range(self.ROWS):
+            for j in range(self.COLS):
                 if (i + j) % 2 == 1:
                     self.c.create_rectangle(i * self.row_height, j * self.col_width,
                                             (i+1) * self.row_height, (j+1) * self.col_width, fill="gray", outline="gray")
 
         # Print grid lines
-        for i in range(6):
+        for i in range(self.ROWS):
             self.c.create_line(0, self.row_height * i, self.WINDOW_WIDTH, self.row_height * i, width=2)
             self.c.create_line(self.col_width * i, 0, self.col_width * i, self.WINDOW_HEIGHT, width=2)
 
@@ -78,8 +78,8 @@ class BoardGUI():
                         # choose different color for different player's checkers
                         if newBoard[i][j] < 0:
                             self.tiles[i][j] = self.c.create_oval(j*self.col_width+10, i*self.row_height+10,
-                                                              (j+1)*self.col_width-10, (i+1)*self.row_height-10,
-                                                              fill="black")
+                                                                  (j+1)*self.col_width-10, (i+1)*self.row_height-10,
+                                                                  fill="black")
                         elif newBoard[i][j] > 0:
                             self.tiles[i][j] = self.c.create_oval(j*self.col_width+10, i*self.row_height+10,
                                                                   (j+1)*self.col_width-10, (i+1)*self.row_height-10,
