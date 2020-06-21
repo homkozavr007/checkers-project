@@ -8,21 +8,26 @@ import tkinter
 from CheckerGame import *
 
 class BoardGUI():
-    def __init__(self, game, size):
+    def __init__(self, game):
         # Initialize parameters
         self.game = game
-        self.ROWS = size
-        self.COLS = size
+        self.style = self.game.style
+        self.ROWS = self.game.size
+        self.COLS = self.game.size
         self.WINDOW_WIDTH = 720
         self.WINDOW_HEIGHT = 720
         self.col_width = self.WINDOW_WIDTH / self.COLS
         self.row_height = self.WINDOW_HEIGHT / self.ROWS
-
         # Initialize GUI
         self.initBoard()
 
     def initBoard(self):
         self.root = tkinter.Tk()
+        #self.root.iconify()
+        #self.window = tkinter.Toplevel(self.root)
+        #self.window.geometry("100x100")  # Whatever size
+        #self.window.overrideredirect(1)
+
         self.c = tkinter.Canvas(self.root, width=self.WINDOW_WIDTH, height=self.WINDOW_HEIGHT,
                                 borderwidth=5, background='white')
         self.c.pack()
@@ -34,7 +39,7 @@ class BoardGUI():
             for j in range(self.COLS):
                 if (i + j) % 2 == 1:
                     self.c.create_rectangle(i * self.row_height, j * self.col_width,
-                                            (i+1) * self.row_height, (j+1) * self.col_width, fill="gray", outline="gray")
+                                            (i+1) * self.row_height, (j+1) * self.col_width, fill=self.style[0], outline="gray")
 
         # Print grid lines
         for i in range(self.ROWS):
@@ -79,11 +84,11 @@ class BoardGUI():
                         if newBoard[i][j] < 0:
                             self.tiles[i][j] = self.c.create_oval(j*self.col_width+10, i*self.row_height+10,
                                                                   (j+1)*self.col_width-10, (i+1)*self.row_height-10,
-                                                                  fill="black")
+                                                                  fill=self.style[2])
                         elif newBoard[i][j] > 0:
                             self.tiles[i][j] = self.c.create_oval(j*self.col_width+10, i*self.row_height+10,
                                                                   (j+1)*self.col_width-10, (i+1)*self.row_height-10,
-                                                                  fill="red")
+                                                                  fill=self.style[1])
                         else:  # no checker
                             continue
 
@@ -123,7 +128,7 @@ class BoardGUI():
                                                           fill="green")
                 self.checkerSelected = True
 
-            else: # no checker at the clicked postion
+            else:  # no checker at the clicked position
                 return
 
         else: # There is a checker being selected

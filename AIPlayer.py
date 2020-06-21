@@ -149,6 +149,7 @@ class AIPlayer():
 # a class for AI to simulate game state
 class AIGameState():
     def __init__(self, game):
+        self.size = game.size
         self.board = copy.deepcopy(game.getBoard())
 
         self.AICheckers = set()
@@ -161,7 +162,7 @@ class AIGameState():
         for checker, position in game.checkerPositions.items():
             self.checkerPositions[checker] = position
 
-    # Check if the human player can cantinue.
+    # Check if the human player can continue.
     def humanCanContinue(self):
         directions = [[-1, -1], [-1, 1], [-2, -2], [-2, 2]]
         for checker in self.humanCheckers:
@@ -169,7 +170,7 @@ class AIGameState():
             row = position[0]
             col = position[1]
             for dir in directions:
-                if self.isValidMove(row, col, row + dir[0], col + dir[1], True):
+                if self.isValidMove(row, col, row + dir[0], col + dir[1], True, self.size):
                     return True
         return False
 
@@ -181,7 +182,7 @@ class AIGameState():
             row = position[0]
             col = position[1]
             for dir in directions:
-                if self.isValidMove(row, col, row + dir[0], col + dir[1], False):
+                if self.isValidMove(row, col, row + dir[0], col + dir[1], False, self.size):
                     return True
         return False
 
@@ -193,10 +194,10 @@ class AIGameState():
             return (not self.AICanContinue()) and (not self.humanCanContinue())
 
     # Check if current move is valid
-    def isValidMove(self, oldrow, oldcol, row, col, humanTurn):
+    def isValidMove(self, oldrow, oldcol, row, col, humanTurn, size):
         # invalid index
-        if oldrow < 0 or oldrow > 5 or oldcol < 0 or oldcol > 5 \
-                or row < 0 or row > 5 or col < 0 or col > 5:
+        if oldrow < 0 or oldrow > size-1 or oldcol < 0 or oldcol > size-1 \
+                or row < 0 or row > size-1 or col < 0 or col > size-1:
             return False
         # No checker exists in original position
         if self.board[oldrow][oldcol] == 0:
@@ -278,10 +279,10 @@ class AIGameState():
             oldrow = self.checkerPositions[checker][0]
             oldcol = self.checkerPositions[checker][1]
             for dir in regularDirs:
-                if self.isValidMove(oldrow, oldcol, oldrow+dir[0], oldcol+dir[1], humanTurn):
+                if self.isValidMove(oldrow, oldcol, oldrow+dir[0], oldcol+dir[1], humanTurn, self.size):
                     regularMoves.append([oldrow, oldcol, oldrow+dir[0], oldcol+dir[1]])
             for dir in captureDirs:
-                if self.isValidMove(oldrow, oldcol, oldrow+dir[0], oldcol+dir[1], humanTurn):
+                if self.isValidMove(oldrow, oldcol, oldrow+dir[0], oldcol+dir[1], humanTurn, self.size):
                     captureMoves.append([oldrow, oldcol, oldrow+dir[0], oldcol+dir[1]])
 
         # must take capture move if possible

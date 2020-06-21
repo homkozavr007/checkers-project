@@ -9,16 +9,27 @@ import time
 import _thread
 from BoardGUI import *
 from AIPlayer import *
+from Menu import *
 
 class CheckerGame():
     def __init__(self):
         self.lock = _thread.allocate_lock()
-        self.board = self.initBigBoard()
-        self.playerTurn = self.whoGoFirst()
-        self.difficulty = self.getDifficulty()
+        self.menu = Menu(self)
+
+
+    def goOn(self):
+        self.playerTurn = self.settings['turn']
+        self.difficulty = self.settings['difficulty']
+        self.size = self.settings['size']
+        self.style = self.settings['style']
+
+        if self.size == 8:
+            self.board = self.initBigBoard()
+        else:
+            self.board = self.initSmallBoard()
+
         self.AIPlayer = AIPlayer(self, self.difficulty)
-        self.size = 8
-        self.GUI = BoardGUI(self, self.size)
+        self.GUI = BoardGUI(self)
 
         # AI goes first
         if not self.isPlayerTurn():
@@ -39,7 +50,7 @@ class CheckerGame():
             ans = eval(input("What level of difficulty? (1 Easy, 2 Medium, 3 Hard) "))
         return ans
 
-    # This function initializes the game board.
+    # This function initializes the game board of small size.
     # Each checker has a label. Positive checkers for the player,
     # and negative checkers for the opponent.
     def initSmallBoard(self):
@@ -240,7 +251,7 @@ class CheckerGame():
             else:
                 return False
 
-    # Check if the player can cantinue
+    # Check if the player can continue
     def playerCanContinue(self):
         directions = [[-1, -1], [-1, 1], [-2, -2], [-2, 2]]
         for checker in self.playerCheckers:
@@ -252,7 +263,7 @@ class CheckerGame():
                     return True
         return False
 
-    # Check if the opponent can cantinue
+    # Check if the opponent can continue
     def opponentCanContinue(self):
         directions = [[1, -1], [1, 1], [2, -2], [2, 2]]
         for checker in self.opponentCheckers:
