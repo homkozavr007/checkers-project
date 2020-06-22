@@ -1,14 +1,8 @@
-#
-#   CS6613 Artificial Intelligence
-#   Project 1 Mini-Checkers Game
-#   Shang-Hung Tsai
-#
-
 import tkinter
 import time
 import _thread
-from BoardGUI import *
 from AIPlayer import *
+from BoardGUI import *
 from Menu import *
 
 class CheckerGame():
@@ -36,19 +30,6 @@ class CheckerGame():
             _thread.start_new_thread(self.AIMakeMove, ())
 
         self.GUI.startGUI()
-
-    # Let player decide to go first or second
-    def whoGoFirst(self):
-        ans = input("Do you want to go first? (Y/N) ")
-        return ans == "Y" or ans == "y"
-
-    # Let player decide level of difficulty
-    def getDifficulty(self):
-        ans = eval(input("What level of difficulty? (1 Easy, 2 Medium, 3 Hard) "))
-        while not (ans == 1 or ans == 2 or ans == 3):
-            print("Invalid input, please enter a value between 1 and 3")
-            ans = eval(input("What level of difficulty? (1 Easy, 2 Medium, 3 Hard) "))
-        return ans
 
     # This function initializes the game board of small size.
     # Each checker has a label. Positive checkers for the player,
@@ -183,15 +164,17 @@ class CheckerGame():
         self.board[row][col] = self.board[oldrow][oldcol]
         self.board[oldrow][oldcol] = 0
 
-        if row == 0 or row == 7:
+        if row == 0 or row == self.size-1:
             self.kingCheckers.add(toMove)
         # capture move, remove captured checker
         if abs(oldrow - row) == 2:
             toRemove = self.board[(oldrow + row) // 2][(oldcol + col) // 2]
             if toRemove > 0:
                 self.playerCheckers.remove(toRemove)
+                self.GUI.destroyChecker((oldcol + col) // 2, (oldrow + row) // 2, True)
             else:
                 self.opponentCheckers.remove(toRemove)
+                self.GUI.destroyChecker((oldcol + col) // 2, (oldrow + row) // 2, False)
             self.board[(oldrow + row) // 2][(oldcol + col) // 2] = 0
             self.checkerPositions.pop(toRemove, None)
 
@@ -345,8 +328,11 @@ class CheckerGame():
         opponentNum = len(self.opponentCheckers)
         if (playerNum > opponentNum):
             print("Player won by {0:d} checkers! Congratulation!".format(playerNum - opponentNum))
+            self.GUI.win(playerNum - opponentNum)
         elif (playerNum < opponentNum):
             print("Computer won by {0:d} checkers! Try again!".format(opponentNum - playerNum))
+            self.GUI.lose(opponentNum - playerNum)
         else:
             print("It is a draw! Try again!")
+            self.GUI.draw(playerNum - opponentNum)
 

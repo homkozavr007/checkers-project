@@ -1,9 +1,3 @@
-#
-#   CS6613 Artificial Intelligence
-#   Project 1 Mini-Checkers Game
-#   Shang-Hung Tsai
-#
-
 import tkinter
 from CheckerGame import *
 
@@ -23,6 +17,11 @@ class BoardGUI():
 
     def initBoard(self):
         self.root = tkinter.Tk()
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        self.x_coord = int((screen_width / 2) - (self.WINDOW_WIDTH / 2))
+        self.y_coord = int((screen_height / 2) - (self.WINDOW_HEIGHT / 2))
+        self.root.geometry("{}x{}+{}+{}".format(self.WINDOW_WIDTH, self.WINDOW_HEIGHT, self.x_coord, self.y_coord))
         #self.root.iconify()
         #self.window = tkinter.Toplevel(self.root)
         #self.window.geometry("100x100")  # Whatever size
@@ -97,7 +96,6 @@ class BoardGUI():
 
             # tell game logic that GUI has updated the board
             self.game.completeBoardUpdate()
-
         # make GUI updates board every second
         self.root.after(1000, self.updateBoard)
 
@@ -125,13 +123,13 @@ class BoardGUI():
                 self.c.delete(self.tiles[row][col])
                 self.tiles[row][col] = self.c.create_oval(col*self.col_width+10, row*self.row_height+10,
                                                          (col+1)*self.col_width-10, (row+1)*self.row_height-10,
-                                                          fill="green")
+                                                          fill=self.style[3])
                 self.checkerSelected = True
 
             else:  # no checker at the clicked position
                 return
 
-        else: # There is a checker being selected
+        else:  # There is a checker being selected
             # First reset the board
             oldrow = self.clickData["row"]
             oldcol = self.clickData["col"]
@@ -144,4 +142,28 @@ class BoardGUI():
             self.game.move(self.clickData["row"], self.clickData["col"], row, col)
             self.checkerSelected = False
 
+    def destroyChecker(self, x, y, isMe):
+        if isMe:
+            colorTake = self.style[1]
+        else:
+            colorTake = self.style[2]
+        for i in range(10):
+            self.disappearingChecker = self.c.create_oval(x * self.col_width + (10 - i),
+                                                          y * self.row_height + (10 - i),
+                                                          (x + 1) * self.col_width - (10 - i),
+                                                          (y + 1) * self.row_height - (10 - i),
+                                                          fill=colorTake)
+            time.sleep(0.05)
+            self.c.delete(self.disappearingChecker)
 
+    def win(self, score):
+        self.c.delete(all)
+        self.c.create_text(400, 400, text="Player won by {0:d} checkers!\nCongratulation!".format(score), font="Verdana 37")
+
+    def lose(self, score):
+        self.c.delete(all)
+        self.c.create_text(400, 400, text="Computer won by {0:d} checkers!\nTry again!".format(score), font="Verdana 37")
+
+    def draw(self, score):
+        self.c.delete(all)
+        self.c.create_text(400, 400, text="It is a draw!\nTry again!".format(score), font="Verdana 37")
