@@ -291,5 +291,5 @@ class CheckerGame():
             self.GUI.lose(opponentNum - playerNum)
         else:
             print("It is a draw! Try again!")
-            self.GUI.draw(playerNum - opponentNum)
+            self.GUI.draw()
 

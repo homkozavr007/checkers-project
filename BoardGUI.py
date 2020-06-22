@@ -1,5 +1,3 @@
-
-
 import tkinter
 from CheckerGame import *
 import time
@@ -35,7 +33,6 @@ class BoardGUI():
         self.c.pack()
         self.board = [[0]*self.COLS for _ in range(self.ROWS)]
         self.tiles = [[None for _ in range(self.COLS)] for _ in range(self.ROWS)]
-
         # Print dark squares
         for i in range(self.ROWS):
             for j in range(self.COLS):
@@ -159,14 +156,32 @@ class BoardGUI():
             self.c.delete(self.disappearingChecker)
 
     def win(self, score):
+        time.sleep(2)
         self.c.delete(all)
-        self.c.create_text(400, 400, text="Player won by {0:d} checkers!\nCongratulation!".format(score), font="Verdana 37")
+        self.c.create_text(375, 355, text="Player won by {0:d} checkers!\nCongratulation!".format(score),
+                           font="Verdana 30 bold", justify='center', fill='green yellow')
+        self.c.create_text(370, 350, text="Player won by {0:d} checkers!\nCongratulation!".format(score),
+                           font="Verdana 30 bold", justify='center')
+        time.sleep(5)
+        self.root.destroy()
 
     def lose(self, score):
+        time.sleep(2)
         self.c.delete(all)
-        self.c.create_text(400, 400, text="Computer won by {0:d} checkers!\nTry again!".format(score), font="Verdana 37")
+        self.c.create_text(365, 355, text="Computer won by {0:d} checkers!\nLoser!".format(score),
+                           font="Verdana 30 bold", justify='center', fill='red')
+        self.c.create_text(360, 350, text="Computer won by {0:d} checkers!\nLoser!".format(score),
+                           font="Verdana 30 bold", justify='center')
+        time.sleep(5)
+        self.root.destroy()
 
-    def draw(self, score):
+    def draw(self):
+        time.sleep(2)
         self.c.delete(all)
-        self.c.create_text(400, 400, text="It is a draw!\nTry again!".format(score), font="Verdana 37")
+        self.c.create_text(375, 355, text="It is a draw!\nNot bad!",
+                           font="Verdana 30 bold", justify='center', fill='yellow')
+        self.c.create_text(370, 350, text="It is a draw!\nNot bad!",
+                           font="Verdana 30 bold", justify='center')
+        time.sleep(5)
+        self.root.destroy()
 
