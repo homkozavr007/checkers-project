@@ -1,9 +1,3 @@
-#
-#   CS6613 Artificial Intelligence
-#   Project 1 Mini-Checkers Game
-#   Shang-Hung Tsai
-#
-
 import copy
 import math
 import random
