@@ -1,5 +1,8 @@
+
+
 import tkinter
 from CheckerGame import *
+import time
 
 class BoardGUI():
     def __init__(self, game):
@@ -78,7 +81,6 @@ class BoardGUI():
                         self.board[i][j] = newBoard[i][j]
                         self.c.delete(self.tiles[i][j])
                         self.tiles[i][j] = None
-
                         # choose different color for different player's checkers
                         if newBoard[i][j] < 0:
                             self.tiles[i][j] = self.c.create_oval(j*self.col_width+10, i*self.row_height+10,
@@ -129,7 +131,7 @@ class BoardGUI():
             else:  # no checker at the clicked position
                 return
 
-        else:  # There is a checker being selected
+        else: # There is a checker being selected
             # First reset the board
             oldrow = self.clickData["row"]
             oldcol = self.clickData["col"]
@@ -167,3 +169,4 @@ class BoardGUI():
     def draw(self, score):
         self.c.delete(all)
         self.c.create_text(400, 400, text="It is a draw!\nTry again!".format(score), font="Verdana 37")
+

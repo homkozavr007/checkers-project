@@ -1,8 +1,8 @@
 import tkinter
 import time
 import _thread
-from AIPlayer import *
 from BoardGUI import *
+from AIPlayer import *
 from Menu import *
 
 class CheckerGame():
@@ -31,12 +31,24 @@ class CheckerGame():
 
         self.GUI.startGUI()
 
+    # Let player decide to go first or second
+    def whoGoFirst(self):
+        ans = input("Do you want to go first? (Y/N) ")
+        return ans == "Y" or ans == "y"
+
+    # Let player decide level of difficulty
+    def getDifficulty(self):
+        ans = eval(input("What level of difficulty? (1 Easy, 2 Medium, 3 Hard) "))
+        while not (ans == 1 or ans == 2 or ans == 3):
+            print("Invalid input, please enter a value between 1 and 3")
+            ans = eval(input("What level of difficulty? (1 Easy, 2 Medium, 3 Hard) "))
+        return ans
+
     # This function initializes the game board of small size.
     # Each checker has a label. Positive checkers for the player,
     # and negative checkers for the opponent.
     def initSmallBoard(self):
         board = [[0]*6 for _ in range(6)]
-        self.kingCheckers = set()
         self.playerCheckers = set()
         self.opponentCheckers = set()
         self.checkerPositions = {}
@@ -62,7 +74,6 @@ class CheckerGame():
     # and negative checkers for the opponent.
     def initBigBoard(self):
         board = [[0] * 8 for _ in range(8)]
-        self.kingCheckers = set()
         self.playerCheckers = set()
         self.opponentCheckers = set()
         self.checkerPositions = {}
@@ -164,8 +175,6 @@ class CheckerGame():
         self.board[row][col] = self.board[oldrow][oldcol]
         self.board[oldrow][oldcol] = 0
 
-        if row == 0 or row == self.size-1:
-            self.kingCheckers.add(toMove)
         # capture move, remove captured checker
         if abs(oldrow - row) == 2:
             toRemove = self.board[(oldrow + row) // 2][(oldcol + col) // 2]
@@ -185,23 +194,12 @@ class CheckerGame():
         checkers = self.playerCheckers
         regularDirs = [[-1, -1], [-1, 1]]
         captureDirs = [[-2, -2], [-2, 2]]
-        kingAddRegularDirs = [[1, -1], [1, 1]]
-        kingAddCaptureDirs = [[2, -2], [2, 2]]
 
         regularMoves = []
         captureMoves = []
         for checker in checkers:
             oldrow = self.checkerPositions[checker][0]
             oldcol = self.checkerPositions[checker][1]
-
-            if checker in self.kingCheckers:
-                for dir in kingAddRegularDirs:
-                    if self.isValidMove(oldrow, oldcol, oldrow + dir[0], oldcol + dir[1], True):
-                        regularMoves.append([oldrow, oldcol, oldrow + dir[0], oldcol + dir[1]])
-                for dir in kingAddCaptureDirs:
-                    if self.isValidMove(oldrow, oldcol, oldrow + dir[0], oldcol + dir[1], True):
-                        captureMoves.append([oldrow, oldcol, oldrow + dir[0], oldcol + dir[1]])
-
             for dir in regularDirs:
                 if self.isValidMove(oldrow, oldcol, oldrow+dir[0], oldcol+dir[1], True):
                     regularMoves.append([oldrow, oldcol, oldrow+dir[0], oldcol+dir[1]])
@@ -229,23 +227,7 @@ class CheckerGame():
             return False
 
         # player's turn
-
         if playerTurn:
-
-            if self.board[oldrow][oldcol] in self.kingCheckers:
-                if abs(row - oldrow) == 1:  # regular move
-                    return abs(col - oldcol) == 1
-                elif row - oldrow == -2:  # capture move
-                    #  \ direction or / direction
-                    return (col - oldcol == -2 and self.board[row + 1][col + 1] < 0) \
-                           or (col - oldcol == 2 and self.board[row + 1][col - 1] < 0)
-                elif row - oldrow == 2:  # capture move
-                    # / direction or \ direction
-                    return (col - oldcol == -2 and self.board[row - 1][col + 1] < 0) \
-                           or (col - oldcol == 2 and self.board[row - 1][col - 1] < 0)
-                else:
-                    return False
-
             if row - oldrow == -1:   # regular move
                 return abs(col - oldcol) == 1
             elif row - oldrow == -2:  # capture move
@@ -256,21 +238,6 @@ class CheckerGame():
                 return False
         # opponent's turn
         else:
-
-            if self.board[oldrow][oldcol] in self.kingCheckers:
-                if abs(row - oldrow) == 1:  # regular move
-                    return abs(col - oldcol) == 1
-                elif row - oldrow == -2:  # capture move
-                    #  \ direction or / direction
-                    return (col - oldcol == -2 and self.board[row + 1][col + 1] < 0) \
-                           or (col - oldcol == 2 and self.board[row + 1][col - 1] < 0)
-                elif row - oldrow == 2:  # capture move
-                    # / direction or \ direction
-                    return (col - oldcol == -2 and self.board[row - 1][col + 1] < 0) \
-                           or (col - oldcol == 2 and self.board[row - 1][col - 1] < 0)
-                else:
-                    return False
-
             if row - oldrow == 1:   # regular move
                 return abs(col - oldcol) == 1
             elif row - oldrow == 2: # capture move
@@ -283,7 +250,6 @@ class CheckerGame():
     # Check if the player can continue
     def playerCanContinue(self):
         directions = [[-1, -1], [-1, 1], [-2, -2], [-2, 2]]
-        kingDirections = [[1, -1], [1, 1], [2, -2], [2, 2]]
         for checker in self.playerCheckers:
             position = self.checkerPositions[checker]
             row = position[0]
@@ -291,16 +257,11 @@ class CheckerGame():
             for dir in directions:
                 if self.isValidMove(row, col, row + dir[0], col + dir[1], True):
                     return True
-            if checker in self.kingCheckers:
-                for dir in kingDirections:
-                    if self.isValidMove(row, col, row + dir[0], col + dir[1], True):
-                        return True
         return False
 
     # Check if the opponent can continue
     def opponentCanContinue(self):
         directions = [[1, -1], [1, 1], [2, -2], [2, 2]]
-        kingDirections = [[-1, -1], [-1, 1], [-2, -2], [-2, 2]]
         for checker in self.opponentCheckers:
             position = self.checkerPositions[checker]
             row = position[0]
@@ -308,10 +269,6 @@ class CheckerGame():
             for dir in directions:
                 if self.isValidMove(row, col, row + dir[0], col + dir[1], False):
                     return True
-            if checker in self.kingCheckers:
-                for dir in kingDirections:
-                    if self.isValidMove(row, col, row + dir[0], col + dir[1], False):
-                        return True
         return False
 
     # Neither player can can continue, thus game over
