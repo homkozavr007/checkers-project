@@ -141,7 +141,7 @@ class BoardGUI():
                                                             fill=self.clickData["color"])
 
             # If the destination leads to a legal move
-            self.game.move(self.clickData["row"], self.clickData["col"],row, col)
+            self.game.move(self.clickData["row"], self.clickData["col"], row, col)
             self.checkerSelected = False
 
 

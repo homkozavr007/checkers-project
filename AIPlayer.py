@@ -150,6 +150,7 @@ class AIPlayer():
 class AIGameState():
     def __init__(self, game):
         self.size = game.size
+        self.game = game
         self.board = copy.deepcopy(game.getBoard())
 
         self.AICheckers = set()
@@ -165,6 +166,7 @@ class AIGameState():
     # Check if the human player can continue.
     def humanCanContinue(self):
         directions = [[-1, -1], [-1, 1], [-2, -2], [-2, 2]]
+        kingDirections = [[1, -1], [1, 1], [2, -2], [2, 2]]
         for checker in self.humanCheckers:
             position = self.checkerPositions[checker]
             row = position[0]
@@ -172,11 +174,16 @@ class AIGameState():
             for dir in directions:
                 if self.isValidMove(row, col, row + dir[0], col + dir[1], True, self.size):
                     return True
+            if checker in self.game.kingCheckers:
+                for dir in kingDirections:
+                    if self.isValidMove(row, col, row + dir[0], col + dir[1], True, self.size):
+                        return True
         return False
 
-    # Check if the AI player can cantinue.
+    # Check if the AI player can continue.
     def AICanContinue(self):
         directions = [[1, -1], [1, 1], [2, -2], [2, 2]]
+        kingDirections = [[-1, -1], [-1, 1], [-2, -2], [-2, 2]]
         for checker in self.AICheckers:
             position = self.checkerPositions[checker]
             row = position[0]
@@ -184,6 +191,10 @@ class AIGameState():
             for dir in directions:
                 if self.isValidMove(row, col, row + dir[0], col + dir[1], False, self.size):
                     return True
+            if checker in self.game.kingCheckers:
+                for dir in kingDirections:
+                    if self.isValidMove(row, col, row + dir[0], col + dir[1], False, self.size):
+                        return True
         return False
 
     # Neither player can can continue, thus game over
@@ -206,8 +217,22 @@ class AIGameState():
         if self.board[row][col] != 0:
             return False
 
-        # human player's turn
         if humanTurn:
+
+            if self.board[oldrow][oldcol] in self.game.kingCheckers:
+                if abs(row - oldrow) == 1:  # regular move
+                    return abs(col - oldcol) == 1
+                elif row - oldrow == -2:  # capture move
+                    #  \ direction or / direction
+                    return (col - oldcol == -2 and self.board[row + 1][col + 1] < 0) \
+                           or (col - oldcol == 2 and self.board[row + 1][col - 1] < 0)
+                elif row - oldrow == 2:  # capture move
+                    # / direction or \ direction
+                    return (col - oldcol == -2 and self.board[row - 1][col + 1] < 0) \
+                           or (col - oldcol == 2 and self.board[row - 1][col - 1] < 0)
+                else:
+                    return False
+
             if row - oldrow == -1:   # regular move
                 return abs(col - oldcol) == 1
             elif row - oldrow == -2:  # capture move
@@ -218,6 +243,21 @@ class AIGameState():
                 return False
         # opponent's turn
         else:
+
+            if self.board[oldrow][oldcol] in self.game.kingCheckers:
+                if abs(row - oldrow) == 1:  # regular move
+                    return abs(col - oldcol) == 1
+                elif row - oldrow == -2:  # capture move
+                    #  \ direction or / direction
+                    return (col - oldcol == -2 and self.board[row + 1][col + 1] > 0) \
+                           or (col - oldcol == 2 and self.board[row + 1][col - 1] > 0)
+                elif row - oldrow == 2:  # capture move
+                    # / direction or \ direction
+                    return (col - oldcol == -2 and self.board[row - 1][col + 1] > 0) \
+                           or (col - oldcol == 2 and self.board[row - 1][col - 1] > 0)
+                else:
+                    return False
+
             if row - oldrow == 1:   # regular move
                 return abs(col - oldcol) == 1
             elif row - oldrow == 2: # capture move
@@ -268,16 +308,29 @@ class AIGameState():
             checkers = self.humanCheckers
             regularDirs = [[-1, -1], [-1, 1]]
             captureDirs = [[-2, -2], [-2, 2]]
+            kingAddRegularDirs = [[1, -1], [1, 1]]
+            kingAddCaptureDirs = [[2, -2], [2, 2]]
         else:
             checkers = self.AICheckers
             regularDirs = [[1, -1], [1, 1]]
             captureDirs = [[2, -2], [2, 2]]
+            kingAddRegularDirs = [[-1, -1], [-1, 1]]
+            kingAddCaptureDirs = [[-2, -2], [-2, 2]]
 
         regularMoves = []
         captureMoves = []
         for checker in checkers:
             oldrow = self.checkerPositions[checker][0]
             oldcol = self.checkerPositions[checker][1]
+
+            if checker in self.game.kingCheckers:
+                for dir in kingAddRegularDirs:
+                    if self.isValidMove(oldrow, oldcol, oldrow + dir[0], oldcol + dir[1], humanTurn, self.size):
+                        regularMoves.append([oldrow, oldcol, oldrow + dir[0], oldcol + dir[1]])
+                for dir in kingAddCaptureDirs:
+                    if self.isValidMove(oldrow, oldcol, oldrow + dir[0], oldcol + dir[1], humanTurn, self.size):
+                        captureMoves.append([oldrow, oldcol, oldrow + dir[0], oldcol + dir[1]])
+
             for dir in regularDirs:
                 if self.isValidMove(oldrow, oldcol, oldrow+dir[0], oldcol+dir[1], humanTurn, self.size):
                     regularMoves.append([oldrow, oldcol, oldrow+dir[0], oldcol+dir[1]])
